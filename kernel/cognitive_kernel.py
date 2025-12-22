@@ -105,6 +105,41 @@ from kernel.emergence.intelligence import (
     GoalManager, SelfReflection, CreativityEngine
 )
 
+# Autognosis (self-awareness)
+try:
+    from kernel.autognosis import AutognosisOrchestrator, AutognosisConfig
+    AUTOGNOSIS_AVAILABLE = True
+except ImportError:
+    AUTOGNOSIS_AVAILABLE = False
+
+# Integration Hub (Manus connection)
+try:
+    from kernel.integration_hub import ManusIntegrationHub, HubConfig
+    INTEGRATION_HUB_AVAILABLE = True
+except ImportError:
+    INTEGRATION_HUB_AVAILABLE = False
+
+# Holistic Metamodel
+try:
+    from kernel.metamodel import HolisticMetamodelOrchestrator, MetamodelConfig
+    METAMODEL_AVAILABLE = True
+except ImportError:
+    METAMODEL_AVAILABLE = False
+
+# Ontogenesis (self-evolution)
+try:
+    from kernel.ontogenesis import EvolutionEngine, EvolutionConfig
+    ONTOGENESIS_AVAILABLE = True
+except ImportError:
+    ONTOGENESIS_AVAILABLE = False
+
+# VORTEX architecture
+try:
+    from kernel.vortex import VortexOrchestrator, VortexConfig
+    VORTEX_AVAILABLE = True
+except ImportError:
+    VORTEX_AVAILABLE = False
+
 
 # =============================================================================
 # KERNEL STATE
@@ -196,6 +231,13 @@ class CognitiveKernel:
         # Distribution (optional)
         self.distributed: Optional[DistributedCoordinationService] = None
         
+        # Advanced cognitive modules (optional)
+        self.autognosis: Optional['AutognosisOrchestrator'] = None
+        self.integration_hub: Optional['ManusIntegrationHub'] = None
+        self.metamodel: Optional['HolisticMetamodelOrchestrator'] = None
+        self.evolution_engine: Optional['EvolutionEngine'] = None
+        self.vortex: Optional['VortexOrchestrator'] = None
+        
         # Service registry
         self._services: Dict[str, KernelService] = {}
         
@@ -270,7 +312,10 @@ class CognitiveKernel:
             if self.config.enable_distribution:
                 self._init_distribution()
             
-            # Phase 5: Start services
+            # Phase 5: Advanced cognitive modules
+            self._init_advanced_modules()
+            
+            # Phase 6: Start services
             self._start_services()
             
             # Boot complete
@@ -382,6 +427,123 @@ class CognitiveKernel:
             port=self.config.cluster_port
         )
         self._register_service(self.distributed)
+    
+    def _init_advanced_modules(self):
+        """
+        Initialize advanced cognitive modules.
+        
+        These modules provide:
+        - Autognosis: Self-awareness and self-monitoring
+        - Integration Hub: Connection to Primary Manus
+        - Metamodel: Holistic organizational dynamics
+        - Ontogenesis: Self-evolution capabilities
+        - VORTEX: Vortical cognitive organization
+        """
+        # Autognosis (self-awareness)
+        if AUTOGNOSIS_AVAILABLE:
+            self.logger.info("Initializing Autognosis (self-awareness)...")
+            try:
+                autognosis_config = AutognosisConfig()
+                self.autognosis = AutognosisOrchestrator(autognosis_config)
+                # Note: Full initialization requires async, done in start_advanced_modules
+            except Exception as e:
+                self.logger.warning(f"Autognosis initialization deferred: {e}")
+        
+        # Integration Hub (Manus connection)
+        if INTEGRATION_HUB_AVAILABLE:
+            self.logger.info("Initializing Manus Integration Hub...")
+            try:
+                hub_config = HubConfig()
+                self.integration_hub = ManusIntegrationHub(hub_config)
+            except Exception as e:
+                self.logger.warning(f"Integration Hub initialization deferred: {e}")
+        
+        # Holistic Metamodel
+        if METAMODEL_AVAILABLE:
+            self.logger.info("Initializing Holistic Metamodel...")
+            try:
+                metamodel_config = MetamodelConfig()
+                self.metamodel = HolisticMetamodelOrchestrator(metamodel_config)
+            except Exception as e:
+                self.logger.warning(f"Metamodel initialization deferred: {e}")
+        
+        # Ontogenesis (self-evolution)
+        if ONTOGENESIS_AVAILABLE:
+            self.logger.info("Initializing Ontogenesis (self-evolution)...")
+            try:
+                evolution_config = EvolutionConfig()
+                self.evolution_engine = EvolutionEngine(evolution_config)
+            except Exception as e:
+                self.logger.warning(f"Evolution Engine initialization deferred: {e}")
+        
+        # VORTEX architecture
+        if VORTEX_AVAILABLE:
+            self.logger.info("Initializing VORTEX architecture...")
+            try:
+                vortex_config = VortexConfig()
+                self.vortex = VortexOrchestrator(vortex_config)
+            except Exception as e:
+                self.logger.warning(f"VORTEX initialization deferred: {e}")
+    
+    async def start_advanced_modules(self):
+        """
+        Start advanced cognitive modules (async initialization).
+        
+        Call this after boot() to fully initialize async modules.
+        """
+        if self.autognosis:
+            try:
+                await self.autognosis.initialize(self)
+                await self.autognosis.start()
+                self.logger.info("Autognosis started")
+            except Exception as e:
+                self.logger.error(f"Autognosis start failed: {e}")
+        
+        if self.integration_hub:
+            try:
+                await self.integration_hub.initialize(self)
+                if await self.integration_hub.connect():
+                    await self.integration_hub.start()
+                    self.logger.info("Integration Hub connected and started")
+            except Exception as e:
+                self.logger.error(f"Integration Hub start failed: {e}")
+        
+        if self.metamodel:
+            try:
+                await self.metamodel.initialize(self)
+                await self.metamodel.start()
+                self.logger.info("Metamodel started")
+            except Exception as e:
+                self.logger.error(f"Metamodel start failed: {e}")
+        
+        if self.evolution_engine:
+            try:
+                await self.evolution_engine.initialize(self)
+                await self.evolution_engine.start()
+                self.logger.info("Evolution Engine started")
+            except Exception as e:
+                self.logger.error(f"Evolution Engine start failed: {e}")
+        
+        if self.vortex:
+            try:
+                await self.vortex.initialize(self)
+                await self.vortex.start()
+                self.logger.info("VORTEX started")
+            except Exception as e:
+                self.logger.error(f"VORTEX start failed: {e}")
+    
+    async def stop_advanced_modules(self):
+        """Stop advanced cognitive modules."""
+        if self.vortex:
+            await self.vortex.stop()
+        if self.evolution_engine:
+            await self.evolution_engine.stop()
+        if self.metamodel:
+            await self.metamodel.stop()
+        if self.integration_hub:
+            await self.integration_hub.stop()
+        if self.autognosis:
+            await self.autognosis.stop()
     
     def _register_service(self, service: KernelService):
         """Register a kernel service."""
