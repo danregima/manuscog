@@ -531,12 +531,20 @@ class PLNEngine(ReasoningService):
     def __init__(
         self,
         atomspace: AtomSpace,
-        max_inference_depth: int = 5,
+        config_or_depth = None,
         min_confidence_threshold: float = 0.01
     ):
         self.atomspace = atomspace
-        self.max_inference_depth = max_inference_depth
-        self.min_confidence_threshold = min_confidence_threshold
+        
+        # Handle both PLNConfig and int for backwards compatibility
+        if isinstance(config_or_depth, PLNConfig):
+            self.config = config_or_depth
+            self.max_inference_depth = config_or_depth.max_depth
+            self.min_confidence_threshold = config_or_depth.confidence_threshold
+        else:
+            self.max_inference_depth = config_or_depth if config_or_depth is not None else 5
+            self.min_confidence_threshold = min_confidence_threshold
+            self.config = PLNConfig(max_depth=self.max_inference_depth)
         
         # Rule set
         self.rule_set = InferenceRuleSet()

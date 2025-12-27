@@ -23,6 +23,7 @@ from .types import (
 )
 from .self_monitor import SelfMonitor, MonitorConfig
 from .self_modeler import HierarchicalSelfModeler, ModelerConfig
+from .optimizer import AutognosisOptimizer, OptimizationPolicy
 
 if TYPE_CHECKING:
     from kernel.cognitive_kernel import CognitiveKernel
@@ -60,6 +61,10 @@ class AutognosisOrchestrator:
         self.monitor = SelfMonitor(MonitorConfig())
         self.modeler = HierarchicalSelfModeler(ModelerConfig(
             max_levels=self.config.max_levels
+        ))
+        self.optimizer = AutognosisOptimizer(OptimizationPolicy(
+            auto_optimize=self.config.enable_auto_optimization,
+            risk_threshold=self.config.optimization_approval_threshold
         ))
         
         # State
@@ -429,12 +434,20 @@ class AutognosisOrchestrator:
     
     async def _apply_safe_optimizations(self, kernel: 'CognitiveKernel',
                                          optimizations: List[OptimizationOpportunity]):
-        """Apply optimizations that are below risk threshold."""
-        for opt in optimizations:
-            if opt.risk_level < self.config.optimization_approval_threshold:
-                logger.info(f"Auto-applying optimization: {opt.title}")
-                # Would apply optimization here
-                # For safety, this is a no-op in the initial implementation
+        """Apply optimizations that are below risk threshold using the optimizer."""
+        if not self.config.enable_auto_optimization:
+            return
+        
+        # Use the optimizer to actually apply changes
+        results = await self.optimizer.apply_optimizations(
+            kernel, optimizations, self._insights
+        )
+        
+        for result in results:
+            if result.success:
+                logger.info(f"Applied optimization: {result.message}")
+            else:
+                logger.debug(f"Optimization skipped: {result.message}")
     
     def _generate_cycle_id(self) -> str:
         """Generate unique cycle ID."""
@@ -466,7 +479,8 @@ class AutognosisOrchestrator:
             'total_insights': len(self._insights),
             'pending_optimizations': len(self._optimizations),
             'monitor_stats': self.monitor.get_statistics(),
-            'modeler_stats': self.modeler.get_statistics()
+            'modeler_stats': self.modeler.get_statistics(),
+            'optimizer_stats': self.optimizer.get_statistics()
         }
     
     def get_self_awareness_report(self) -> Dict[str, Any]:

@@ -120,9 +120,9 @@ class SelfMonitor:
                 last_activity=datetime.now(),
                 metrics={
                     'atom_count': kernel.atomspace.size(),
-                    'node_count': len([a for a in kernel.atomspace.get_atoms() 
+                    'node_count': len([a for a in kernel.atomspace 
                                       if hasattr(a, 'name')]),
-                    'link_count': len([a for a in kernel.atomspace.get_atoms() 
+                    'link_count': len([a for a in kernel.atomspace 
                                       if hasattr(a, 'outgoing')])
                 }
             )
